@@ -1,0 +1,39 @@
+name: Quality Check – LocalEats
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  quality:
+    name: Testes Automatizados e Qualidade
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instalar dependências
+        working-directory: docs/atividade-12
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Executar testes com relatório JUnit
+        working-directory: docs/atividade-12
+        run: |
+          pytest tests/ -v --tb=short --junitxml=test-results.xml
+
+      - name: Publicar resultados dos testes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: docs/atividade-12/test-results.xml
